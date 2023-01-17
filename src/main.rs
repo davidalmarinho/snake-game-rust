@@ -15,22 +15,28 @@ const HEIGHT: i16 = 20;
 fn print_board(p_pos: &mut Vec<i16>, rocks_pos: &mut Vec<i16>) {
     for y in 0..HEIGHT {
         for x in 0..WIDTH {
-            let mut print_p: bool = false;
-            let mut print_rock : bool = false;
+            let mut print_grass: bool = true;
+
+            // Print player
             for index in 0..p_pos.len() {
                 if x + y * WIDTH == p_pos[index] {
-                    print_p = true;
-                } else if x + y * WIDTH == rocks_pos[index] {
-			print_rock = true;
+                    print!("🐍");
+                    print_grass = false;
+                } 
+            }
+
+            // Print rocks
+            for index in 0..rocks_pos.len() {
+                if x + y * WIDTH == rocks_pos[index] {
+		    print!("🪨");
+                    print_grass = false;
 	        }
             }
-            if print_p {
-                print!("🐍");
-            } else if print_rock {
-		print!("🪨");
-            } else {
+
+            // Print grass
+            if print_grass {
                 print!("🌱");
-            }
+            } 
         }
         println!("");
     }
@@ -127,6 +133,22 @@ fn spawn_player() -> Vec<i16> {
     p_positions
 }
 
+fn spawn_rocks(p_coords: &mut Vec<i16>, number_of_rocks: u8) -> Vec<i16> {
+    let mut rand_lib = rand::thread_rng();
+
+    let mut rocks_coords = Vec::<i16>::new();
+    for i in 0..number_of_rocks {
+        for j in 0..p_coords.len() {
+            let random_pos: i16 = rand_lib.gen_range(0..WIDTH * HEIGHT); 
+            if p_coords[j] != random_pos {
+                rocks_coords.push(random_pos);
+                break;
+            }
+        }
+    }
+    rocks_coords
+}
+
 fn is_game_over(player_coords: &mut Vec<i16>, rocks_coords: &mut Vec<i16>) -> bool {
     let mut game_over = false;
 
@@ -157,11 +179,8 @@ fn main() {
     let mut cur_play: char = 'd';
     let mut last_play: char = cur_play;
     let mut p_pos = spawn_player();
-    let mut rocks_coords = Vec::<i16>::new();
+    let mut rocks_coords = spawn_rocks(&mut p_pos, 20);
     let mut game_over: bool = false;
-    rocks_coords.push(78);
-    rocks_coords.push(80);
-    rocks_coords.push(204);
 
     loop {
         refresh();
